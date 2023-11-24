@@ -1,6 +1,6 @@
 "use client";
 
-import { MarkdownLexical, MarkdownLexicalFormatTextPlugin } from "../ui/markdown-lexical";
+import { MarkdownLexical, MarkdownLexicalAlignPlugin, MarkdownLexicalFormatTextPlugin } from "../ui/markdown-lexical";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -31,8 +31,11 @@ export default function MarkdownLexicalForm() {
                     errors.markdownRequired ? 'border border-solid rounded-sm border-red-600 bg-red-200 dark:bg-red-200' : ''
                 )}
                 {...register('markdownRequired', { required: true })}
+                defaultMarkdownValue={`<div align="center">**asdas**\n\n***asdddppp***\n\n***asd** qweqwewqe     dddssss*</div>`}
+            // placeholder={`<div align="center">**asdas**\n\n***asdddppp***\n\n***asd** qweqwewqe     dddssss*</div>}`}
             >
                 <MarkdownLexicalFormatTextPlugin />
+                <MarkdownLexicalAlignPlugin />
 
             </MarkdownLexical>
             {errors.markdownRequired && <div className="w-full text-red-600">Markdown textarea is required</div>}

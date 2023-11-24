@@ -14,11 +14,11 @@ import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPl
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { HeadingNode, QuoteNode, $createQuoteNode, $isHeadingNode } from '@lexical/rich-text';
-import { $getSelection, $isRangeSelection, BLUR_COMMAND, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, EditorState, FOCUS_COMMAND, FORMAT_TEXT_COMMAND, GridSelection, LexicalCommand, LexicalEditor, NodeSelection, REDO_COMMAND, RangeSelection, TextFormatType, UNDO_COMMAND } from 'lexical';
+import { $getSelection, $isRangeSelection, BLUR_COMMAND, CAN_REDO_COMMAND, CAN_UNDO_COMMAND, EditorState, FOCUS_COMMAND, FORMAT_TEXT_COMMAND, GridSelection, LexicalCommand, LexicalEditor, NodeSelection, REDO_COMMAND, RangeSelection, TextFormatType, UNDO_COMMAND, FORMAT_ELEMENT_COMMAND } from 'lexical';
 import { ComponentPropsWithoutRef, Fragment, MouseEvent, ReactNode, forwardRef, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { Button } from './button';
-import { BoldIcon, ItalicIcon, ListIcon, ListOrderedIcon, QuoteIcon, Redo2, StrikethroughIcon, UnderlineIcon, Undo2 } from 'lucide-react';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, BoldIcon, ItalicIcon, ListIcon, ListOrderedIcon, QuoteIcon, Redo2, StrikethroughIcon, UnderlineIcon, Undo2 } from 'lucide-react';
 import { mergeRegister, $getNearestNodeOfType } from '@lexical/utils';
 import { $wrapNodes } from '@lexical/selection';
 import dynamic from 'next/dynamic';
@@ -47,6 +47,9 @@ const tailwindTheme = {
     strikethrough: 'line-through',
     underlineStrikethrough: 'line-through underline',
   },
+  align: {
+
+  }
 };
 
 const LowPriority = 1;
@@ -247,6 +250,81 @@ const MarkdownLexicalFormatTextPlugin = () => {
 }
 
 /**
+ * Align Plugin
+ */
+const MarkdownLexicalAlignPlugin = () => {
+  const [isLeftAlign, setIsLeftAlign] = useState(false);
+  const [isCenterAlign, setIsCenterAlign] = useState(false);
+  const [isRightAlign, setIsRightAlign] = useState(false)
+  const [isJustifyAlign, setIsJustifyAlign] = useState(false)
+  const [editor] = useLexicalComposerContext();
+  const [blockType, setBlockType] = useState('paragraph');
+
+  // register all listeners to update the toolbar
+  useEffect(() => {
+    return editor.registerCommand(
+      UPDATE_STATE_COMMAND,
+      ({ blockType, selection }, _newEditor) => {
+        setBlockType(blockType);
+        if ($isRangeSelection(selection)) {
+          setIsLeftAlign(blockType == 'left');
+          setIsCenterAlign(blockType == 'center');
+          setIsRightAlign(blockType == 'right');
+          setIsJustifyAlign(blockType == 'justify');
+        }
+        return false;
+      }, LowPriority)
+  }, [editor]);
+
+  return <>
+    <Button
+      variant={'outline'}
+      type='button'
+      className="!rounded-[4px] p-0 w-7 h-7 md:w-9 md:h-9"
+      onClick={() => {
+        editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
+      }}
+      aria-label="Left Align"
+    >
+      <AlignLeft />
+    </Button>
+    <Button
+      variant={'outline'}
+      type='button'
+      className="!rounded-[4px] p-0 w-7 h-7 md:w-9 md:h-9"
+      onClick={() => {
+        editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
+      }}
+      aria-label="Center Align"
+    >
+      <AlignCenter />
+    </Button>
+    <Button
+      variant={'outline'}
+      type='button'
+      className="!rounded-[4px] p-0 w-7 h-7 md:w-9 md:h-9"
+      onClick={() => {
+        editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
+      }}
+      aria-label="Right Align"
+    >
+      <AlignRight />
+    </Button>
+    <Button
+      variant={'outline'}
+      type='button'
+      className="!rounded-[4px] p-0 w-7 h-7 md:w-9 md:h-9"
+      onClick={() => {
+        editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
+      }}
+      aria-label="Justify Align"
+    >
+      <AlignJustify />
+    </Button>
+  </>
+}
+
+/**
  * Undo / Redo plugin 
  */
 const MarkdownLexicalUndoRedoPlugin = () => {
@@ -395,6 +473,7 @@ export {
   MarkdownLexicalNoSSR,
   MarkdownLexicalToolbar,
   MarkdownLexicalFormatTextPlugin,
+  MarkdownLexicalAlignPlugin,
   MarkdownLexicalUndoRedoPlugin,
   MarkdownLexicalQuotePlugin,
   MarkdownLexicalListPlugin,
